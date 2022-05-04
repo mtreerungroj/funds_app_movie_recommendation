@@ -54,11 +54,12 @@ app.layout = html.Div([
                                           options=movie_lists,
                                           multi=False)]
                    ),
-          html.Div(id="similarity",
-                   children=[html.Div(children=[html.H3(id='focused-movie',
+          html.Div(children=[html.Div(children=[html.H3(id='focused-movie',
                                                         style={'margin': 'auto'}),
                                                 html.Div(id='focused-poster')],
-                                      style={'textAlign': 'center', 'flexBasis': '100%'})
+                                      style={'textAlign': 'center', 'flexBasis': '100%'}),
+                             html.Div(id='similar-movies',
+                                      style={'textAlign': 'center', 'flexBasis': '100%', 'display': 'flex', 'width': '100%', 'justifyContent': 'space-around'})
                    ],
                    style={'display': 'flex', 'width': '90%', 'justifyContent': 'space-around'}
                    ),
@@ -123,15 +124,39 @@ def recommendation(_, text):
   return recommended_movies + scores + poster_divs
 
 @app.callback([Output('focused-movie', 'children'),
-               Output('focused-poster', 'children')],
+               Output('focused-poster', 'children'),
+               Output('similar-movies', 'children')],
               Input('movie-lists', 'value'))
 def similarity(focus_movie):
-  
-  movie_idx = list(movie_lists).index(focus_movie)
-  focus_poster_url = poster_lists[movie_idx]
+  topn = 3
+
+  focus_movie_idx = list(movie_lists).index(focus_movie)
+  focus_poster_url = poster_lists[focus_movie_idx]
   focus_poster = html.Img(style={'maxHeight': '400px'}, src=focus_poster_url)
 
-  return focus_movie, focus_poster
+  similar_idxs = np.argsort(pairwise_similarities[focus_movie_idx])[::-1]
+  # similar_scores = list(similarity[similar_idxs[1:topn+1]])
+  similar_movies = list(movie_lists[similar_idxs[1:topn+1]])
+  similar_posters = list(poster_lists[similar_idxs[1:topn+1]])
+
+  similar_div_list = [html.Div(children=[html.H3(similar_movies[i],
+                                                 style={'marginBottom': 0}),
+                                         html.H4("score...",
+                                                 style={'margin': 'auto'}),
+                                         html.Div(html.Img(style={'maxHeight': '250px'},
+                                                      src=similar_posters[i]))
+                                         ],
+                               style={'textAlign': 'center', 'flexBasis': '100%', 'margin': '10px'}) for i in range(topn)]
+
+  similar_div = html.Div(children=[html.H5("Similar movies"),
+                                   html.Div(children=[similar_div_list[0],
+                                                      similar_div_list[1],
+                                                      similar_div_list[2]],
+                                            style={'display': 'flex', 'width': '90%', 'justifyContent': 'space-around'}),
+                                   ]
+                         )
+
+  return focus_movie, focus_poster, similar_div
 
 
 if __name__ == "__main__":
