@@ -49,7 +49,22 @@ sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
 app.layout = html.Div([
           html.H1('Movie Recommendation'),
-          html.H2("we will recommend movies that are close to the story you describe."),
+          
+          html.Div(children=[dcc.Dropdown(id="movie-lists",
+                                          options=movie_lists,
+                                          multi=False)]
+                   ),
+          html.Div(id="similarity",
+                   children=[html.Div(children=[html.H3(id='focused-movie',
+                                                        style={'margin': 'auto'}),
+                                                html.Div(id='focused-poster')],
+                                      style={'textAlign': 'center', 'flexBasis': '100%'})
+                   ],
+                   style={'display': 'flex', 'width': '90%', 'justifyContent': 'space-around'}
+                   ),
+          
+
+          html.H2("We will recommend movies that are close to the story you describe."),
           html.Div(dcc.Input(id='overview', type='text',
                              placeholder='Describe the movie you want to see... (keyword, overview, story)',
                              value='Ice magic princess who lives with sister',
@@ -106,6 +121,17 @@ def recommendation(_, text):
   poster_divs = [html.Img(style={'maxHeight': '400px'}, src=url) for url in recommended_posters]
 
   return recommended_movies + scores + poster_divs
+
+@app.callback([Output('focused-movie', 'children'),
+               Output('focused-poster', 'children')],
+              Input('movie-lists', 'value'))
+def similarity(focus_movie):
+  
+  movie_idx = list(movie_lists).index(focus_movie)
+  focus_poster_url = poster_lists[movie_idx]
+  focus_poster = html.Img(style={'maxHeight': '400px'}, src=focus_poster_url)
+
+  return focus_movie, focus_poster
 
 
 if __name__ == "__main__":
