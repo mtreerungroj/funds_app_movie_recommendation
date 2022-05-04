@@ -2,7 +2,7 @@
 
 This project aims to study about movie recommendation systems using [BERT](https://github.com/google-research/bert) and was deployed on [Heroku](https://www.heroku.com/).
 
-🚀✨ [Demo](https://dashboard.heroku.com/apps/fundsappwithdocker) ✨🚀
+🚀✨ [Demo](https://fundsappwithdocker.herokuapp.com/) ✨🚀
 
 ## Building the docker image
 
