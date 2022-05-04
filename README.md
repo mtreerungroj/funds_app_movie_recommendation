@@ -9,10 +9,10 @@ docker image build -t dash-heroku:latest .
 2. Run docker:
 
 ```
-docker container run -d -p 6004:6004 dash-heroku
+docker container run -d -p 6005:6005 dash-heroku
 ```
 
-App is running at http://localhost:6004/.
+App is running at http://localhost:6005/.
 
 ## Deploying to Heroku
 
