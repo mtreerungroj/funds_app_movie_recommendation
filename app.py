@@ -49,20 +49,25 @@ app.layout = html.Div([
           html.H2('どんな映画が見てみたいですか？'),
           html.Div(dcc.Input(id='overview', type='text',
                              placeholder='Type an overview...',
-                             style={'width': '80%'})),
+                             style={'width': '80%'})
+          ),
           html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
-          html.Div(children=[html.Div(children=[html.H3(id='moviename1', style={'marginBottom': 0}),
-                                                html.H4(id='moviescore1', style={'margin': 'auto'})],
-                                      style={'textAlign': 'center'}),
+          html.Div(id="movie",
+                   children=[html.Div(children=[html.H3(id='moviename1', style={'marginBottom': 0}),
+                                                html.H4(id='moviescore1', style={'margin': 'auto'}),
+                                                html.Div(id='poster1')],
+                                      style={'textAlign': 'center', 'flexBasis': '100%'}),
                              html.Div(children=[html.H3(id='moviename2', style={'marginBottom': 0}),
-                                                html.H4(id='moviescore2', style={'margin': 'auto'})],
-                                      style={'textAlign': 'center'}),
+                                                html.H4(id='moviescore2', style={'margin': 'auto'}),
+                                                html.Div(id='poster2')],
+                                      style={'textAlign': 'center', 'flexBasis': '100%'}),
                              html.Div(children=[html.H3(id='moviename3', style={'marginBottom': 0}),
-                                                html.H4(id='moviescore3', style={'margin': 'auto'})],
-                                      style={'textAlign': 'center'})],
+                                                html.H4(id='moviescore3', style={'margin': 'auto'}),
+                                                html.Div(id='poster3')],
+                                      style={'textAlign': 'center', 'flexBasis': '100%'})],
                    style={'display': 'flex', 'width': '90%', 'justifyContent': 'space-around'}
-          )
-])
+                   )
+          ])
 
 ##############################################
 # APP CALLBACKS
@@ -73,7 +78,10 @@ app.layout = html.Div([
                Output('moviename3', 'children'),
                Output('moviescore1', 'children'),
                Output('moviescore2', 'children'),
-               Output('moviescore3', 'children')],
+               Output('moviescore3', 'children'),
+               Output('poster1', 'children'),
+               Output('poster2', 'children'),
+               Output('poster3', 'children')],
               Input('submit-button-state', 'n_clicks'),
               State('overview', 'value'),
               prevent_initial_call=True)
@@ -90,7 +98,14 @@ def recommendation(_, text):
   # result = [recommended_movies[i] + ' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
   scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
   
-  return recommended_movies+scores
+  poster_urls = ["https://upload.wikimedia.org/wikipedia/en/d/dc/Poster_of_the_movie_Scott_Walker-_30_Century_Man.jpg",
+                 "https://upload.wikimedia.org/wikipedia/en/b/b6/The_Shaggy_Dog_%282006_movie_poster%29.jpg",
+                 "https://m.media-amazon.com/images/M/MV5BODM0MjMyMTUyOF5BMl5BanBnXkFtZTcwMjIwMTY3Mw@@._V1_FMjpg_UX1000_.jpg"
+                 ]
+
+  poster_divs = [html.Img(style={'maxHeight': '400px'}, src=poster_url) for poster_url in poster_urls]
+
+  return recommended_movies + scores + poster_divs
 
 
 if __name__ == "__main__":
