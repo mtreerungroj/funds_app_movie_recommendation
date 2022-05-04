@@ -9,13 +9,12 @@ import os
 import re
 import pickle
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-port = int(os.environ.get("PORT", 6005))
+port = int(os.environ.get("PORT", 6006))
 
 ##############################################
 # FUNCTIONS
@@ -41,7 +40,9 @@ with open('./data/stopwords', 'rb') as fp:
 with open('./data/poster_urls_lists', 'rb') as fp:
   poster_lists = pickle.load(fp)
 
-sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+with open('./model/model.pickle', 'rb') as fp:
+  sbert_model = pickle.load(fp)
+
 pairwise_similarities = cosine_similarity(document_embeddings)
 
 ##############################################
