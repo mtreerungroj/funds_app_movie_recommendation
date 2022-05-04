@@ -1,41 +1,28 @@
+# Movie Recommendation
+
+This project aims to study about movie recommendation systems using [BERT](https://github.com/google-research/bert) and was deployed on [Heroku](https://www.heroku.com/).
+
+🚀✨ [Demo](https://dashboard.heroku.com/apps/fundsappwithdocker) ✨🚀
+
 ## Building the docker image
 
-1. Build docker
-
 ```
-docker image build -t dash-heroku:latest .
+. ./run.sh
 ```
 
-2. Run docker:
-
-```
-docker container run -d -p 6006:6006 dash-heroku
-```
-
-App is running at http://localhost:6006/.
+App is running on http://localhost:6006/.
 
 ## Deploying to Heroku
 
-1. Login to Heroku (first time only):
+1. Login to Heroku and create an app (first time only):
 
 ```
 heroku container:login
-```
-
-2. Create an app on Heroku (first time only):
-
-```
 heroku create <appname>
 ```
 
-3. Create the container in Heroku:
+2. Deploy:
 
 ```
-heroku container:push web --app <appname>
-```
-
-4. Release the app:
-
-```
-heroku container:release web --app <appname>
+. ./deploy.sh
 ```
