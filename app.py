@@ -22,31 +22,19 @@ port = int(os.environ.get("PORT", 6004))
 
 def prepare_text(x):
   return " ".join(re.sub(r'[^a-zA-Z]',' ',w).lower() for w in x.split() if re.sub(r'[^a-zA-Z]',' ',w).lower() not in stop_words_l)
-  
-def recommendation(text, topn=3):
-  prepared_text = prepare_text(text)
-  embedded_text = [list(sbert_model.encode(prepared_text))]
-
-  similarity = cosine_similarity(embedded_text, document_embeddings)[0]
-  similar_idx = np.argsort(similarity)[::-1]
-
-  similarity_scores = list(similarity[similar_idx[:topn]])
-  recommended_movies = list(movie_lists[similar_idx[:topn]])
-
-  return recommended_movies, similarity_scores
 
 
 ##############################################
 # DATA
 ##############################################
 
-with open('./movie_vectors/movie_lists', 'rb') as fp:
+with open('./data/movie_lists', 'rb') as fp:
   movie_lists = pickle.load(fp)
 
-with open('./movie_vectors/document_embeddings', 'rb') as fp:
+with open('./data/document_embeddings', 'rb') as fp:
   document_embeddings = pickle.load(fp)
 
-with open('./others/stopwords', 'rb') as fp:
+with open('./data/stopwords', 'rb') as fp:
   stop_words_l = pickle.load(fp)
 
 sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
@@ -59,16 +47,33 @@ sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 app.layout = html.Div([
           html.H1('Movie recommendation'),
           html.H2('どんな映画が見てみたいですか？'),
-          html.Div(dcc.Input(id='overview', type='text', value='Type an overview...')),
+          html.Div(dcc.Input(id='overview', type='text',
+                             placeholder='Type an overview...',
+                             style={'width': '80%'})),
           html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
-          html.H3(id='output')
+          html.Div(children=[html.Div(children=[html.H3(id='moviename1', style={'marginBottom': 0}),
+                                                html.H4(id='moviescore1', style={'margin': 'auto'})],
+                                      style={'textAlign': 'center'}),
+                             html.Div(children=[html.H3(id='moviename2', style={'marginBottom': 0}),
+                                                html.H4(id='moviescore2', style={'margin': 'auto'})],
+                                      style={'textAlign': 'center'}),
+                             html.Div(children=[html.H3(id='moviename3', style={'marginBottom': 0}),
+                                                html.H4(id='moviescore3', style={'margin': 'auto'})],
+                                      style={'textAlign': 'center'})],
+                   style={'display': 'flex', 'width': '90%', 'justifyContent': 'space-around'}
+          )
 ])
 
 ##############################################
 # APP CALLBACKS
 ##############################################
 
-@app.callback(Output('output', 'children'),
+@app.callback([Output('moviename1', 'children'),
+               Output('moviename2', 'children'),
+               Output('moviename3', 'children'),
+               Output('moviescore1', 'children'),
+               Output('moviescore2', 'children'),
+               Output('moviescore3', 'children')],
               Input('submit-button-state', 'n_clicks'),
               State('overview', 'value'),
               prevent_initial_call=True)
@@ -82,8 +87,10 @@ def recommendation(_, text):
 
   similarity_scores = list(similarity[similar_idx[:topn]])
   recommended_movies = list(movie_lists[similar_idx[:topn]])
-
-  return recommended_movies#, similarity_scores
+  # result = [recommended_movies[i] + ' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
+  scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
+  
+  return recommended_movies+scores
 
 
 if __name__ == "__main__":
