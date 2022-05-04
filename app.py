@@ -51,7 +51,7 @@ app.layout = html.Div([
           html.H1('Movie Recommendation'),
           html.H2("we will recommend movies that are close to the story you describe."),
           html.Div(dcc.Input(id='overview', type='text',
-                             placeholder='Describe the movie you want to see...',
+                             placeholder='Describe the movie you want to see... (keyword, overview, story)',
                              value='Ice magic princess who lives with sister',
                              style={'width': '80%'})
           ),
