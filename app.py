@@ -1,5 +1,8 @@
 # DASH
-from dash import dcc, html
+import dash
+from dash import dcc
+import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 # OTHER LIBRARIES
 import os
@@ -109,13 +112,13 @@ def recommendation(_, text):
   embedded_text = [list(sbert_model.encode(prepared_text))]
 
   similarity = cosine_similarity(embedded_text, document_embeddings)[0]
-  similar_idxs = np.argsort(similarity)[::-1]
+  similar_idx = np.argsort(similarity)[::-1]
 
-  similarity_scores = list(similarity[similar_idxs[:topn]])
-  recommended_movies = list(movie_lists[similar_idxs[:topn]])
-  recommended_posters = list(poster_lists[similar_idxs[:topn]])
+  similarity_scores = list(similarity[similar_idx[:topn]])
+  recommended_movies = list(movie_lists[similar_idx[:topn]])
+  recommended_posters = list(poster_lists[similar_idx[:topn]])
               
-  scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(topn)]
+  scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
 
   poster_divs = [html.Img(style={'maxHeight': '400px'}, src=url) for url in recommended_posters]
 
