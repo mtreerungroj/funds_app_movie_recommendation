@@ -37,6 +37,9 @@ with open('./data/document_embeddings', 'rb') as fp:
 with open('./data/stopwords', 'rb') as fp:
   stop_words_l = pickle.load(fp)
 
+with open('./data/poster_urls_lists', 'rb') as fp:
+  poster_lists = pickle.load(fp)
+
 sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
 
@@ -45,10 +48,11 @@ sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 ##############################################
 
 app.layout = html.Div([
-          html.H1('Movie recommendation'),
-          html.H2('どんな映画が見てみたいですか？'),
+          html.H1('Movie Recommendation'),
+          html.H2("we will recommend movies that are close to the story you describe."),
           html.Div(dcc.Input(id='overview', type='text',
-                             placeholder='Type an overview...',
+                             placeholder='Describe the movie you want to see...',
+                             value='Ice magic princess who lives with sister',
                              style={'width': '80%'})
           ),
           html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
@@ -95,15 +99,11 @@ def recommendation(_, text):
 
   similarity_scores = list(similarity[similar_idx[:topn]])
   recommended_movies = list(movie_lists[similar_idx[:topn]])
-  # result = [recommended_movies[i] + ' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
+  recommended_posters = list(poster_lists[similar_idx[:topn]])
+              
   scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
-  
-  poster_urls = ["https://upload.wikimedia.org/wikipedia/en/d/dc/Poster_of_the_movie_Scott_Walker-_30_Century_Man.jpg",
-                 "https://upload.wikimedia.org/wikipedia/en/b/b6/The_Shaggy_Dog_%282006_movie_poster%29.jpg",
-                 "https://m.media-amazon.com/images/M/MV5BODM0MjMyMTUyOF5BMl5BanBnXkFtZTcwMjIwMTY3Mw@@._V1_FMjpg_UX1000_.jpg"
-                 ]
 
-  poster_divs = [html.Img(style={'maxHeight': '400px'}, src=poster_url) for poster_url in poster_urls]
+  poster_divs = [html.Img(style={'maxHeight': '400px'}, src=url) for url in recommended_posters]
 
   return recommended_movies + scores + poster_divs
 
