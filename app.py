@@ -1,7 +1,5 @@
 # DASH
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
 # OTHER LIBRARIES
 import os
@@ -14,7 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-port = int(os.environ.get("PORT", 6004))
+port = int(os.environ.get("PORT", 6005))
 
 ##############################################
 # FUNCTIONS
@@ -41,7 +39,7 @@ with open('./data/poster_urls_lists', 'rb') as fp:
   poster_lists = pickle.load(fp)
 
 sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
-
+pairwise_similarities = cosine_similarity(document_embeddings)
 
 ##############################################
 # APP LAYOUT
@@ -111,17 +109,18 @@ def recommendation(_, text):
   embedded_text = [list(sbert_model.encode(prepared_text))]
 
   similarity = cosine_similarity(embedded_text, document_embeddings)[0]
-  similar_idx = np.argsort(similarity)[::-1]
+  similar_idxs = np.argsort(similarity)[::-1]
 
-  similarity_scores = list(similarity[similar_idx[:topn]])
-  recommended_movies = list(movie_lists[similar_idx[:topn]])
-  recommended_posters = list(poster_lists[similar_idx[:topn]])
+  similarity_scores = list(similarity[similar_idxs[:topn]])
+  recommended_movies = list(movie_lists[similar_idxs[:topn]])
+  recommended_posters = list(poster_lists[similar_idxs[:topn]])
               
-  scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(3)]
+  scores = [' (' + str(round(similarity_scores[i]*100, 2)) + '%)' for i in range(topn)]
 
   poster_divs = [html.Img(style={'maxHeight': '400px'}, src=url) for url in recommended_posters]
 
   return recommended_movies + scores + poster_divs
+
 
 @app.callback([Output('focused-movie', 'children'),
                Output('focused-poster', 'children'),
@@ -134,14 +133,15 @@ def similarity(focus_movie):
   focus_poster_url = poster_lists[focus_movie_idx]
   focus_poster = html.Img(style={'maxHeight': '400px'}, src=focus_poster_url)
 
-  similar_idxs = np.argsort(pairwise_similarities[focus_movie_idx])[::-1]
-  # similar_scores = list(similarity[similar_idxs[1:topn+1]])
+  pairwise = pairwise_similarities[focus_movie_idx]  
+  similar_idxs = np.argsort(pairwise)[::-1]
+  similar_scores = list(pairwise[similar_idxs[1:topn+1]])
   similar_movies = list(movie_lists[similar_idxs[1:topn+1]])
   similar_posters = list(poster_lists[similar_idxs[1:topn+1]])
 
   similar_div_list = [html.Div(children=[html.H3(similar_movies[i],
                                                  style={'marginBottom': 0}),
-                                         html.H4("score...",
+                                         html.H4('(' + str(round(similar_scores[i]*100, 2)) + '%)',
                                                  style={'margin': 'auto'}),
                                          html.Div(html.Img(style={'maxHeight': '250px'},
                                                       src=similar_posters[i]))
